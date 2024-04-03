@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regiões do Brasil</title>
+  <style>
+    .region-list {
+      display: flex;
+      flex-direction: row; /* Alterado para linha para dispor as caixas lado a lado */
+      justify-content: space-between; /* Espaço uniforme entre as caixas */
+      padding: 20px;
+    }
+
+    .region-list h2 {
+      margin-bottom: 10px;
+    }
+
+    .button-container {
+      border: 1px solid #4CAF50; /* Adicionando uma borda à caixa de texto */
+      border-radius: 5px; /* Adicionando bordas arredondadas */
+      overflow: hidden; /* Para que a borda envolva os botões completamente */
+      width: 400px; /* Definindo a largura da caixa de texto */
+      height: 700px; /* Definindo a altura da caixa de texto */
+      display: flex; /* Para centralizar o texto */
+      flex-direction: column; /* Alinhar o texto em coluna */
+      justify-content: flex-start; /* Para centralizar o texto verticalmente no topo */
+      align-items: center; /* Para centralizar o texto horizontalmente */
+    }
+
+    .button-container h2 {
+      align-self: flex-start; /* Posiciona o título no topo */
+    }
+
+    .region-list button {
+      background-color: transparent;
+      color: #0a0a0a; /* Alterando a cor do texto */
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-bottom: 5px;
+      text-decoration: none; /* Removendo sublinhado */
+      font-weight: normal; /* Removendo negrito */
+      border: none; /* Removendo borda dos botões */
+    }
+  </style>
+  <script>
+    function carregarEstados(regiao) {
+      var estadosContainer = document.getElementById("estados-container");
+      var mesorregioesContainer = document.getElementById("mesorregioes-container");
+
+      estadosContainer.textContent = "Carregando...";
+      mesorregioesContainer.textContent = ""; // Limpa a caixa de mesorregiões
+
+      // Mapa de regiões para URLs correspondentes
+      var urls = {
+        "Centro-Oeste": "https://servicodados.ibge.gov.br/api/v1/localidades/regioes/5/estados?orderBy=nome",
+        "Nordeste": "https://servicodados.ibge.gov.br/api/v1/localidades/regioes/2/estados?orderBy=nome",
+        "Norte": "https://servicodados.ibge.gov.br/api/v1/localidades/regioes/1/estados?orderBy=nome",
+        "Sudeste": "https://servicodados.ibge.gov.br/api/v1/localidades/regioes/3/estados?orderBy=nome",
+        "Sul": "https://servicodados.ibge.gov.br/api/v1/localidades/regioes/4/estados?orderBy=nome"
+      };
+
+      // Verifica se a região selecionada está no mapa
+      if (regiao in urls) {
+        var url = urls[regiao];
+
+        // Simula uma requisição AJAX para obter os estados correspondentes à região
+        fetch(url)
+          .then(response => response.json())
+          .then(estados => {
+            estadosContainer.textContent = ""; // Limpa o conteúdo anterior
+            estados.forEach(estado => {
+              var estadoButton = document.createElement("button");
+              estadoButton.textContent = estado.nome;
+              estadoButton.onclick = function() {
+                carregarMesorregioes(estado.sigla);
+              };
+              estadosContainer.appendChild(estadoButton);
+            });
+          })
+          .catch(error => {
+            estadosContainer.textContent = "Erro ao carregar estados.";
+          });
+      } else {
+        estadosContainer.textContent = "Selecione uma região válida.";
+      }
+    }
+
+    function carregarMesorregioes(estado) {
+        
+      var mesorregioesContainer = document.getElementById("mesorregioes-container");
+      mesorregioesContainer.textContent = "Carregando...";
+
+      // Simula uma requisição AJAX para obter as mesorregiões correspondentes ao estado
+      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/mesorregioes?orderBy=nome`)
+          .then(response => response.json())
+          .then(mesorregioes => {
+            mesorregioesContainer.textContent = ""; // Limpa o conteúdo anterior
+            mesorregioes.forEach(mesorregiao => {
+              var mesorregiaoDiv = document.createElement("div");
+              mesorregiaoDiv.textContent = mesorregiao.nome;
+              mesorregioesContainer.appendChild(mesorregiaoDiv);
+            });
+          })
+          .catch(error => {
+            mesorregioesContainer.textContent = "Erro ao carregar mesorregiões.";
+          });
+    }
+  </script>
+</head>
+<body>
+  <div class="region-list">
+    <div class="button-container"> <!-- Div que envolve os botões -->
+      <h2>Regiões</h2>
+      <button onclick="carregarEstados('Centro-Oeste')">Centro-Oeste</button>
+      <button onclick="carregarEstados('Nordeste')">Nordeste</button>
+      <button onclick="carregarEstados('Norte')">Norte</button>
+      <button onclick="carregarEstados('Sudeste')">Sudeste</button>
+      <button onclick="carregarEstados('Sul')">Sul</button>
+    </div>
+    <div class="button-container"> <!-- Div que envolve os botões -->
+      <h2>Estados</h2> <!-- Alteração do título para "Estados" -->
+      <div id="estados-container"> <!-- Contêiner para os estados -->
+        Carregando...
+      </div>
+    </div>
+    <div class="button-container"> <!-- Div que envolve os botões -->
+      <h2>Mesorregiões</h2>
+      <div id="mesorregioes-container"> <!-- Contêiner para as mesorregiões -->
+        Carregando...
+      </div>
+    </div>
+  </div>
+</body>
+</html>
